@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Console — Aesthetic Physique Plan</title>
+<style>
+  :root{
+    --bg-0:#080b14;
+    --bg-1:#0d1220;
+    --glass:rgba(124,92,246,0.08);
+    --glass-border:rgba(148,130,255,0.22);
+    --glass-border-strong:rgba(148,130,255,0.4);
+    --violet:#8b7cf6;
+    --violet-dim:#5d4fc7;
+    --blue:#38bdf8;
+    --amber:#fbbf24;
+    --text-hi:#eef0fb;
+    --text-mid:#a8adc9;
+    --text-lo:#6b7091;
+    --ok:#34d399;
+    --radius:16px;
+    --radius-sm:10px;
+    font-family: 'Segoe UI', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(124,92,246,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(56,189,248,0.10), transparent 60%),
+      var(--bg-0);
+    color:var(--text-hi);
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .shell{max-width:980px;margin:0 auto;}
+
+  /* particles */
+  .particle{
+    position:fixed; border-radius:50%; background:var(--amber);
+    opacity:0.35; filter:blur(1px); pointer-events:none; z-index:0;
+  }
+
+  /* header */
+  .eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--blue); font-weight:600; margin-bottom:10px;
+  }
+  h1{
+    font-size:clamp(28px,4vw,40px); font-weight:700; letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#fff 10%,var(--violet) 90%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    margin-bottom:6px;
+  }
+  .sub{color:var(--text-mid); font-size:15px; margin-bottom:24px;}
+
+  .stat-row{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px;}
+  .stat-chip{
+    background:var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(14px); border-radius:999px; padding:8px 16px;
+    font-size:13px; color:var(--text-mid); display:flex; gap:6px; align-items:baseline;
+  }
+  .stat-chip b{color:var(--text-hi); font-size:14px; font-weight:600;}
+
+  /* nav */
+  .tabs{display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap;}
+  .tab{
+    background:transparent; border:1px solid var(--glass-border); color:var(--text-mid);
+    padding:10px 18px; border-radius:999px; font-size:14px; font-weight:500;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .tab:hover{border-color:var(--glass-border-strong); color:var(--text-hi);}
+  .tab.active{
+    background:linear-gradient(135deg,var(--violet-dim),var(--violet));
+    border-color:transparent; color:#fff;
+    box-shadow:0 4px 20px rgba(124,92,246,0.35);
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(14px); border-radius:var(--radius);
+    padding:22px 24px; margin-bottom:18px;
+  }
+  .card h3{font-size:16px; font-weight:600; margin-bottom:4px; color:var(--text-hi);}
+  .card p{color:var(--text-mid); font-size:13.5px; line-height:1.6;}
+
+  .grid-4{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:18px;}
+  .metric{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+    padding:16px; backdrop-filter:blur(14px);
+  }
+  .metric .label{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-lo); margin-bottom:6px;}
+  .metric .value{font-size:22px; font-weight:700; color:var(--amber);}
+
+  ul.priority{list-style:none;}
+  ul.priority li{
+    display:flex; gap:10px; align-items:flex-start; padding:8px 0;
+    border-bottom:1px solid rgba(148,130,255,0.1); font-size:14px; color:var(--text-mid);
+  }
+  ul.priority li:last-child{border-bottom:none;}
+  ul.priority li .n{
+    width:22px; height:22px; border-radius:50%; background:rgba(56,189,248,0.15);
+    color:var(--blue); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; margin-top:1px;
+  }
+
+  /* day selector */
+  .day-row{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
+  .day-btn{
+    flex:1; min-width:90px; background:var(--glass); border:1px solid var(--glass-border);
+    color:var(--text-mid); padding:14px 8px; border-radius:var(--radius-sm); cursor:pointer;
+    text-align:center; transition:all .2s ease;
+  }
+  .day-btn .d{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-lo);}
+  .day-btn .l{font-size:13px; font-weight:600; margin-top:3px;}
+  .day-btn.active{border-color:var(--amber); background:rgba(251,191,36,0.1); box-shadow:0 0 0 1px rgba(251,191,36,0.3);}
+  .day-btn.active .d{color:var(--amber);}
+  .day-btn.active .l{color:var(--text-hi);}
+  .day-btn.rest{opacity:0.55;}
+
+  .progress-wrap{margin-bottom:18px;}
+  .progress-bar{height:6px; background:rgba(148,130,255,0.12); border-radius:99px; overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--blue),var(--violet)); width:0%; transition:width .3s ease;}
+  .progress-label{font-size:12px; color:var(--text-lo); margin-top:6px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{
+    text-align:left; color:var(--text-lo); font-weight:600; font-size:11px;
+    text-transform:uppercase; letter-spacing:.05em; padding:0 10px 10px; border-bottom:1px solid var(--glass-border);
+  }
+  td{padding:10px; border-bottom:1px solid rgba(148,130,255,0.08); color:var(--text-mid); vertical-align:top;}
+  tr.done td{opacity:0.4; text-decoration:line-through;}
+  td.ex-name{color:var(--text-hi); font-weight:500;}
+  .check{
+    width:20px; height:20px; border-radius:6px; border:1.5px solid var(--glass-border-strong);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; background:transparent;
+  }
+  .check.on{background:var(--ok); border-color:var(--ok); color:#08130f; font-weight:700; font-size:12px;}
+
+  /* diet meal cards */
+  .meal-card{display:flex; justify-content:space-between; gap:16px; align-items:flex-start;}
+  .meal-card .macros{display:flex; gap:14px; flex-shrink:0; text-align:right;}
+  .meal-card .macros div{font-size:12px; color:var(--text-lo);}
+  .meal-card .macros b{display:block; font-size:14px; color:var(--text-hi); font-weight:600;}
+  .meal-name{font-size:13px; color:var(--blue); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;}
+
+  .totals{
+    display:flex; justify-content:space-around; text-align:center; padding:18px 0;
+  }
+  .totals div .value{font-size:20px; font-weight:700; color:var(--text-hi);}
+  .totals div .label{font-size:11px; color:var(--text-lo); text-transform:uppercase; letter-spacing:.06em;}
+
+  /* tracker */
+  .log-form{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;}
+  .log-form input{
+    background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); color:var(--text-hi);
+    padding:10px 14px; border-radius:var(--radius-sm); font-size:14px; flex:1; min-width:120px;
+  }
+  .log-form input:focus{outline:none; border-color:var(--amber);}
+  .log-form button{
+    background:linear-gradient(135deg,var(--violet-dim),var(--violet)); border:none; color:#fff;
+    padding:10px 22px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .log-form button:hover{filter:brightness(1.1);}
+  .error-msg{color:#f87171; font-size:12.5px; margin:-10px 0 14px;}
+
+  .log-entry{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(148,130,255,0.08); font-size:13.5px;}
+  .log-entry .date{color:var(--text-lo);}
+  .log-entry .w{color:var(--text-hi); font-weight:600;}
+  .empty-state{color:var(--text-lo); font-size:13.5px; text-align:center; padding:24px 0;}
+
+  .footer-note{text-align:center; color:var(--text-lo); font-size:12px; margin-top:40px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="eyebrow">Aesthetic Build Console</div>
+  <h1>Your V-Taper Build Plan</h1>
+  <p class="sub">Beginner · Lean bulk phase · 5 days/week · No fixed deadline</p>
+
+  <div class="stat-row">
+    <div class="stat-chip">Weight <b>50 kg</b></div>
+    <div class="stat-chip">Height <b>161 cm</b></div>
+    <div class="stat-chip">Calories <b>~2450 kcal</b></div>
+    <div class="stat-chip">Protein <b>~107 g</b></div>
+    <div class="stat-chip">Split <b>Upper / Lower</b></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="workout">Workout</button>
+    <button class="tab" data-tab="diet">Diet</button>
+    <button class="tab" data-tab="tracker">Tracker</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="panel active" id="overview">
+    <div class="card">
+      <h3>Strategy — lean bulk</h3>
+      <p>At 50 kg / 161 cm you're on the lean side, so the plan runs a calorie surplus focused on building muscle, not cutting fat. Targets below are a starting estimate — expect to adjust after 3–4 weeks based on your weekly weight trend.</p>
+    </div>
+    <div class="grid-4">
+      <div class="metric"><div class="label">Calories</div><div class="value">2,450</div></div>
+      <div class="metric"><div class="label">Protein</div><div class="value">107g</div></div>
+      <div class="metric"><div class="label">Carbs</div><div class="value">295g</div></div>
+      <div class="metric"><div class="label">Fat</div><div class="value">70g</div></div>
+    </div>
+    <div class="card">
+      <h3>Priority areas</h3>
+      <ul class="priority">
+        <li><span class="n">1</span>Shoulders — width for the V-taper look</li>
+        <li><span class="n">2</span>Back — width and thickness (lats + rows)</li>
+        <li><span class="n">3</span>Chest — proportion with shoulders</li>
+        <li><span class="n">4</span>Full-body strength — foundation as a beginner</li>
+        <li><span class="n">5</span>Posture — rear delts and face pulls for rounded shoulders</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Weekly rhythm</h3>
+      <p>Mon Upper A · Tue Lower A · Wed Upper B · Thu light/rest · Fri Lower B · Sat–Sun rest. Fixed schedule on purpose — routine beats willpower for consistency.</p>
+    </div>
+  </div>
+
+  <!-- WORKOUT -->
+  <div class="panel" id="workout">
+    <div class="day-row" id="dayRow"></div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+      <div class="progress-label" id="progLabel">0 of 0 exercises done</div>
+    </div>
+    <div class="card" style="padding:16px 8px;">
+      <table id="exTable">
+        <thead>
+          <tr><th style="width:36px;"></th><th>Exercise</th><th>Sets</th><th>Reps</th><th>Rest</th><th>Target</th></tr>
+        </thead>
+        <tbody id="exBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DIET -->
+  <div class="panel" id="diet">
+    <div class="card"><h3>Eggetarian · home-based · ~2,450 kcal/day</h3><p>4 meals a day — easier to hit protein at a low starting bodyweight than 3 large ones.</p></div>
+    <div class="card meal-card">
+      <div><div class="meal-name">Breakfast</div><p>Oats cooked in milk (60g) + banana + 1 tbsp peanut butter</p></div>
+      <div class="macros"><div><b>550</b>kcal</div><div><b>20g</b>protein</div></div>
+    </div>
+    <div class="card meal-card">
+      <div><div class="meal-name">Mid-morning</div><p>100g paneer or 200g curd + a handful of almonds</p></div>
+      <div class="macros"><div><b>350</b>kcal</div><div><b>20g</b>protein</div></div>
+    </div>
+    <div class="card meal-card">
+      <div><div class="meal-name">Lunch</div><p>1.5 cups rice + 1 cup dal + vegetable sabzi + 1 cup curd</p></div>
+      <div class="macros"><div><b>650</b>kcal</div><div><b>25g</b>protein</div></div>
+    </div>
+    <div class="card meal-card">
+      <div><div class="meal-name">Pre/post-workout</div><p>300ml milk + banana (whey optional later if needed)</p></div>
+      <div class="macros"><div><b>300</b>kcal</div><div><b>12g</b>protein</div></div>
+    </div>
+    <div class="card meal-card">
+      <div><div class="meal-name">Dinner</div><p>3-4 roti + 150g paneer or 1 cup legumes + vegetable sabzi</p></div>
+      <div class="macros"><div><b>600</b>kcal</div><div><b>30g</b>protein</div></div>
+    </div>
+    <div class="card totals">
+      <div><div class="value">2,450</div><div class="label">kcal</div></div>
+      <div><div class="value">107g</div><div class="label">protein</div></div>
+      <div><div class="value">295g</div><div class="label">carbs</div></div>
+      <div><div class="value">70g</div><div class="label">fat</div></div>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="panel" id="tracker">
+    <div class="card">
+      <h3>Log your weight</h3>
+      <p style="margin-bottom:14px;">Weigh in weekly, same day and time, for the clearest trend.</p>
+      <div class="log-form">
+        <input type="date" id="logDate">
+        <input type="number" id="logWeight" placeholder="Weight in kg" step="0.1" min="20" max="300">
+        <button id="logBtn">Log entry</button>
+      </div>
+      <div class="error-msg" id="logError" style="display:none;"></div>
+      <div id="logList"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">Built from your intake — adjust calories per the rules if weight stalls for 2–3 weeks in either direction.</div>
+</div>
+
+<script>
+  // ambient amber particles
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const s=Math.random()*3+1;
+    p.style.width=s+'px'; p.style.height=s+'px';
+    p.style.left=Math.random()*100+'vw';
+    p.style.top=Math.random()*100+'vh';
+    document.body.appendChild(p);
+  }
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab).classList.add('active');
+    });
+  });
+
+  // workout data
+  const workoutData = {
+    Mon:{label:'Upper A', ex:[
+      ['Bench Press','3','8-10','90s','Chest'],
+      ['Lat Pulldown','3','10-12','90s','Back width'],
+      ['Seated DB Shoulder Press','3','8-10','90s','Shoulders'],
+      ['Cable Row','3','10-12','90s','Back thickness'],
+      ['DB Lateral Raise','3','12-15','60s','Side delts'],
+      ['Bicep Curl','2','10-12','60s','Arms'],
+      ['Tricep Pushdown','2','10-12','60s','Arms'],
+    ]},
+    Tue:{label:'Lower A', ex:[
+      ['Squat','3','8-10','2 min','Quads/Glutes'],
+      ['Romanian Deadlift','3','8-10','90s','Hamstrings'],
+      ['Leg Press','3','10-12','90s','Quads'],
+      ['Leg Curl','3','10-12','60s','Hamstrings'],
+      ['Standing Calf Raise','3','12-15','60s','Calves'],
+      ['Plank','3','30-45s','45s','Core'],
+    ]},
+    Wed:{label:'Upper B', ex:[
+      ['Incline DB Press','3','8-10','90s','Upper chest'],
+      ['Pull-up (assisted)','3','6-10','90s','Back width'],
+      ['Overhead Press','3','8-10','90s','Shoulders'],
+      ['Chest-Supported Row','3','10-12','90s','Back thickness'],
+      ['Cable Face Pull','3','12-15','60s','Rear delts / posture'],
+      ['Hammer Curl','2','10-12','60s','Arms'],
+      ['Overhead Tricep Ext','2','10-12','60s','Arms'],
+    ]},
+    Thu:{label:'Rest', rest:true, ex:[
+      ['Light walk','1','20-30 min','—','Recovery'],
+    ]},
+    Fri:{label:'Lower B', ex:[
+      ['Bulgarian Split Squat','3','8-10/leg','90s','Quads/Glutes'],
+      ['Leg Extension','3','12-15','60s','Quads'],
+      ['Hip Thrust','3','10-12','90s','Glutes'],
+      ['Seated Leg Curl','3','10-12','60s','Hamstrings'],
+      ['Seated Calf Raise','3','12-15','60s','Calves'],
+      ['Hanging Knee Raise','3','10-15','45s','Abs'],
+    ]},
+    Sat:{label:'Rest', rest:true, ex:[]},
+    Sun:{label:'Rest', rest:true, ex:[]},
+  };
+
+  const dayRow = document.getElementById('dayRow');
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let currentDay = 'Mon';
+  let checkState = {};
+
+  function renderDays(){
+    dayRow.innerHTML='';
+    days.forEach(d=>{
+      const info = workoutData[d];
+      const btn=document.createElement('div');
+      btn.className='day-btn'+(d===currentDay?' active':'')+(info.rest?' rest':'');
+      btn.innerHTML='<div class="d">'+d+'</div><div class="l">'+info.label+'</div>';
+      btn.addEventListener('click',()=>{ currentDay=d; checkState={}; renderDays(); renderExercises(); });
+      dayRow.appendChild(btn);
+    });
+  }
+
+  function renderExercises(){
+    const body=document.getElementById('exBody');
+    const info=workoutData[currentDay];
+    body.innerHTML='';
+    if(info.ex.length===0){
+      body.innerHTML='<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-lo);">Rest day — no training scheduled.</td></tr>';
+    } else {
+      info.ex.forEach((row,idx)=>{
+        const tr=document.createElement('tr');
+        tr.id='row-'+idx;
+        tr.innerHTML='<td><button class="check" data-idx="'+idx+'">✓</button></td>'+
+          '<td class="ex-name">'+row[0]+'</td><td>'+row[1]+'</td><td>'+row[2]+'</td><td>'+row[3]+'</td><td>'+row[4]+'</td>';
+        body.appendChild(tr);
+      });
+    }
+    body.querySelectorAll('.check').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const idx=btn.dataset.idx;
+        checkState[idx]=!checkState[idx];
+        btn.classList.toggle('on', checkState[idx]);
+        document.getElementById('row-'+idx).classList.toggle('done', checkState[idx]);
+        updateProgress();
+      });
+    });
+    updateProgress();
+  }
+
+  function updateProgress(){
+    const info=workoutData[currentDay];
+    const total=info.ex.length;
+    const done=Object.values(checkState).filter(Boolean).length;
+    const pct= total>0 ? Math.round((done/total)*100) : 0;
+    document.getElementById('progFill').style.width=pct+'%';
+    document.getElementById('progLabel').textContent = done+' of '+total+' exercises done';
+  }
+
+  renderDays();
+  renderExercises();
+
+  // tracker with persistent storage
+  const logList = document.getElementById('logList');
+  const logError = document.getElementById('logError');
+  document.getElementById('logDate').valueAsDate = new Date();
+
+  async function loadEntries(){
+    try{
+      const res = await window.storage.get('weight-log', false);
+      return res && res.value ? JSON.parse(res.value) : [];
+    } catch(e){ return []; }
+  }
+
+  async function saveEntries(entries){
+    try{
+      await window.storage.set('weight-log', JSON.stringify(entries), false);
+    } catch(e){}
+  }
+
+  function renderEntries(entries){
+    logList.innerHTML='';
+    if(entries.length===0){
+      logList.innerHTML='<div class="empty-state">No entries yet — log your first weigh-in above.</div>';
+      return;
+    }
+    const sorted=[...entries].sort((a,b)=> new Date(b.date)-new Date(a.date));
+    sorted.forEach(e=>{
+      const div=document.createElement('div');
+      div.className='log-entry';
+      div.innerHTML='<span class="date">'+e.date+'</span><span class="w">'+e.weight+' kg</span>';
+      logList.appendChild(div);
+    });
+  }
+
+  async function init(){
+    const entries = await loadEntries();
+    renderEntries(entries);
+  }
+  init();
+
+  document.getElementById('logBtn').addEventListener('click', async ()=>{
+    const dateVal = document.getElementById('logDate').value;
+    const weightVal = document.getElementById('logWeight').value;
+    logError.style.display='none';
+    if(!dateVal || !weightVal || parseFloat(weightVal) <= 0){
+      logError.textContent = 'Enter a valid date and weight first.';
+      logError.style.display='block';
+      return;
+    }
+    const entries = await loadEntries();
+    const filtered = entries.filter(e=>e.date!==dateVal);
+    filtered.push({date:dateVal, weight:parseFloat(weightVal)});
+    await saveEntries(filtered);
+    renderEntries(filtered);
+    document.getElementById('logWeight').value='';
+  });
+</script>
+
+</body>
+</html>
