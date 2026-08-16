@@ -418,16 +418,23 @@
   const logError = document.getElementById('logError');
   document.getElementById('logDate').valueAsDate = new Date();
 
+  const LOG_STORAGE_KEY = 'weight-log';
+
   async function loadEntries(){
     try{
-      const res = await window.storage.get('weight-log', false);
-      return res && res.value ? JSON.parse(res.value) : [];
-    } catch(e){ return []; }
+      const raw = localStorage.getItem(LOG_STORAGE_KEY);
+      if(!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch(e){
+      localStorage.removeItem(LOG_STORAGE_KEY);
+      return [];
+    }
   }
 
   async function saveEntries(entries){
     try{
-      await window.storage.set('weight-log', JSON.stringify(entries), false);
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(entries));
     } catch(e){}
   }
 
